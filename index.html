@@ -1,27 +1,64 @@
 <style>
+body, html, div {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #181818;
+}
+div#divs {
+    display: grid;
+    grid-template-columns: repeat(100, minmax(1px, 1fr));
+    width: 100vw;
+    height: 100vh;
+    touch-action: none;
+}
+
+div#divs div {
+    background: #888;
+    border: 1px solid #848484;
+}
 </style>
 
 <div id=divs>
     <!-- Divs appear here dynamicaly -->
-    <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
-    <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
-    <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
-    <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
-    <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
-    <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
-    <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
 </div>
 
 <script>
-
 const divs = document.getElementById("divs");
 
 function motion(event) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const index = getIndex(event);
+    console.log(index);
+    return false;
 }
 
-divs.addEventListener('mousedown', motion);
-divs.addEventListener('mousemove', motion);
-divs.addEventListener('touchstart', motion);
-divs.addEventListener('touchmove', motion);
+function getIndex(event) {
+    const target = event.target;
+    return +target.getAttribute('i');
+}
+
+
+function getCoords(event) {
+    return {
+        x: event.clientX,
+        y: event.clientY,
+    };
+}
+
+let divOffest = 0;
+function addMoreDivs() {
+    const count = 10;
+    addMoreDivs.count
+    const additionalDivs = Array.from({length: count}, (_, index) =>
+        `<div i=${divOffest + index}></div>`)
+    divOffest += count;
+    divs.innerHTML += additionalDivs.join('');
+}
+setInterval( addMoreDivs, 1000 );
+
+divs.addEventListener('pointerdown', motion);
+divs.addEventListener('pointermove', motion);
 
 </script>
