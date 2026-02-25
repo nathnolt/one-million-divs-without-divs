@@ -1,0 +1,101 @@
+<style>
+body, html, div {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #222;
+}
+div#divs {
+    display: grid;
+    grid-template-columns: repeat(100, minmax(2px, 1fr));
+    width: 100vw;
+    height: 100vh;
+    touch-action: none;
+}
+
+div#divs div {
+    background: #222;
+}
+</style>
+
+<div id=divs>
+    <!-- Divs appear here dynamicaly -->
+</div>
+
+<script src=pubnub.js></script>
+<script>
+const userId  = `userId-${Math.random()}.${Math.random()}`;
+const channel = 'one-million-divs';
+const pubnub  = PubNub({userId: userId});
+const divs    = document.getElementById("divs");
+const color   = `#${rngHex()}${rngHex()}${rngHex()}`;
+const qsCache = {};
+
+function rngHex() {
+    return (Math.ceil(Math.random()*128)+127).toString(16);
+}
+
+function broadcast(index, color) {
+    pubnub.publish({
+        channel : channel,
+        message : {
+            index : index,
+            color : color,
+        },
+    });
+}
+pubnub.subscribe({
+    channel: channel,
+    messages: (msg) =>
+        colorize(msg.index, msg.color),
+});
+
+let lastIndex = -1;
+function motion(event) {
+    event.preventDefault();
+    //event.stopImmediatePropagation();
+    const index = getIndex(event);
+
+    // Prevent dupliate transmissions
+    if (lastIndex == index) return false;
+    lastIndex = index;
+
+    // Transmit and colorize locally
+    broadcast(index, color);
+    colorize(index, color);
+
+    // Prevent propegation
+    return true;
+}
+
+function queryDiv(index) {
+    if (index in qsCache) return qsCache[index];
+    const target = document.querySelector(`div[i="${index}"]`);
+    qsCache[index] = target;
+    return target;
+}
+
+function colorize(index, color) {
+    const target = document.querySelector(`div[i="${index}"]`);
+    target.style.backgroundColor = color;
+}
+
+function getIndex(event) {
+    const target = event.target;
+    return +target.getAttribute('i');
+}
+
+let divOffest = 0;
+function addMoreDivs(count=1000000) {
+    for(let i = 0; i<count; i++) {
+        let div = document.createElement('div');
+        div.setAttribute('i', divOffest +  i);
+        divs.appendChild(div);
+    }
+}
+addMoreDivs();
+
+divs.addEventListener('pointerdown', motion);
+divs.addEventListener('pointermove', motion);
+
+</script>
