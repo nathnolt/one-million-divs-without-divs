@@ -3,6 +3,7 @@ body, html, div {
     margin: 0;
     padding: 0;
     overflow: hidden;
+    background: #222;
 }
 div#divs {
     display: grid;
@@ -49,13 +50,22 @@ pubnub.subscribe({
         colorize(msg.index, msg.color),
 });
 
+let lastIndex = -1;
 function motion(event) {
     event.preventDefault();
-    event.stopImmediatePropagation();
+    //event.stopImmediatePropagation();
     const index = getIndex(event);
+
+    // Prevent dupliate transmissions
+    if (lastIndex == index) return false;
+    lastIndex = index;
+
+    // Transmit and colorize locally
     broadcast(index, color);
     colorize(index, color);
-    return false;
+
+    // Prevent propegation
+    return true;
 }
 
 function queryDiv(index) {
