@@ -63,8 +63,6 @@ function motion(event) {
     // Transmit and colorize locally
     broadcast(index, color);
     colorize(index, color);
-
-    // Prevent propegation
     return true;
 }
 
@@ -95,7 +93,7 @@ function addMoreDivs(count=10000) {
 }
 addMoreDivs();
 
-divs.addEventListener('pointerdown', motion);
+//divs.addEventListener('pointerdown', motion);
 divs.addEventListener('pointermove', motion);
 
 </script>
