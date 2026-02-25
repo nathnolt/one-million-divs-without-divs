@@ -4,12 +4,15 @@ body, html, div {
     padding: 0;
     overflow: hidden;
     background: #222;
-    border: 0;
+    outline: none;
+    border: none;
     gap: 0;
+    row-gap: 0;
+    column-gap: 0;
 }
 div#divs {
     display: grid;
-    grid-template-columns: repeat(100, minmax(2px, 1fr));
+    grid-template-columns: repeat(100, minmax(1%, 1%));
     width: 100vw;
     height: 100vh;
     touch-action: none;
