@@ -203,11 +203,18 @@ function clamp(num, min, max) {
 
 pubnub.subscribe({
     channel: channel,
-    messages: (msg) =>
-        colorize(msg.index, msg.color),
+    messages: (msg) => 
+		colorize(msg.index, msg.color)
 })
 
 function colorize(index, color) {
+	if(isNaN(index)) {
+		return
+	}
+	
+	if(color == null) {
+		color = '#ffffff'
+	}
 	
 	const x = index % canvas_height
 	const y = Math.floor(index / canvas_height)
