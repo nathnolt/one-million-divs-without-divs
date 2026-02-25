@@ -59,6 +59,7 @@ input {
 		<span class="group">
 			<label for="color">Color</label>
 			<input id="color" type="color" value="#ffff00">
+			<button id="get-randomcolor">Random</button>
 		</span>
 		
 		<span class="group">
@@ -92,8 +93,13 @@ const canvas_height = 100
 c.width = canvas_width
 c.height = canvas_height
 
-let theColor = '#ff0'
+const randomR = Math.random()
+let theColor
+
+
 const colorInput = $('#color')
+setRandomColor()
+$('#get-randomcolor').addEventListener('click', setRandomColor)
 colorInput.addEventListener('input', function() {
 	theColor = color.value
 })
@@ -111,6 +117,11 @@ const rainbowSpeedInput = $('#rainbow-speed')
 rainbowSpeedInput.addEventListener('input', function() {
 	rainbowChangeSpeed = Number(rainbowSpeedInput.value)
 })
+
+function setRandomColor() {
+	theColor = randomColor()
+	colorInput.value = theColor
+}
 
 const sizeInput = $('#size')
 
@@ -299,4 +310,13 @@ function rgb2hex(rgbArr) {
 	
 	return hex
 }
+
+
+function randomColor() {
+	const r = Math.floor(100 + Math.random() * 156)
+	const g = Math.floor(100 + Math.random() * 156)
+	const b = Math.floor(100 + Math.random() * 156)
+	return rgb2hex([r,g,b])
+}
+
 </script>
