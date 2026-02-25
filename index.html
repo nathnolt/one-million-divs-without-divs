@@ -30,6 +30,26 @@ const pubnub  = PubNub({userId: userId});
 const divs    = document.getElementById("divs");
 const color   = `#${rngHex()}${rngHex()}${rngHex()}`;
 const qsCache = {};
+const rainbowStep = 0.05
+
+
+
+function makeRainbow(rainbowStep) {
+    let t = 0;
+    return function () {
+        t += rainbowStep;
+
+        const r = Math.sin(t) * 127 + 128;
+        const g = Math.sin(t + 2 * Math.PI / 3) * 127 + 128;
+        const b = Math.sin(t + 4 * Math.PI / 3) * 127 + 128;
+
+        return (
+            `#${Math.round(r).toString(16).padStart(2, "0")}${Math.round(g).toString(16).padStart(2, "0")}${Math.round(b).toString(16).padStart(2, "0")}`
+        );
+    };
+}
+const nextColor = makeRainbow(rainbowStep);
+
 
 function rngHex() {
     return (Math.ceil(Math.random()*128)+127).toString(16);
@@ -59,6 +79,8 @@ function motion(event) {
     // Prevent dupliate transmissions
     if (lastIndex == index) return false;
     lastIndex = index;
+
+    const color = nextColor()
 
     // Transmit and colorize locally
     broadcast(index, color);
