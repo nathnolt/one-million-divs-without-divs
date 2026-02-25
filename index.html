@@ -55,8 +55,10 @@ pubnub.subscribe({
 let lastIndex = -1;
 function motion(event) {
     event.preventDefault();
-    //event.stopImmediatePropagation();
+
+    // Get div index ID
     const index = getIndex(event);
+    if (index < 0) return false;
 
     // Prevent dupliate transmissions
     if (lastIndex == index) return false;
@@ -76,12 +78,13 @@ function queryDiv(index) {
 }
 
 function colorize(index, color) {
-    const target = document.querySelector(`div[i="${index}"]`);
+    const target = queryDiv(index);
     target.style.backgroundColor = color;
 }
 
 function getIndex(event) {
-    const target = event.target;
+    const target = document.elementFromPoint(event.clientX, event.clientY);
+    if (!target || !target.hasAttribute('i')) return -1;
     return +target.getAttribute('i');
 }
 
@@ -95,7 +98,6 @@ function addMoreDivs(count=10000) {
 }
 addMoreDivs();
 
-//divs.addEventListener('pointerdown', motion);
+divs.addEventListener('pointerdown', motion);
 divs.addEventListener('pointermove', motion);
-
 </script>
