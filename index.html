@@ -22,20 +22,46 @@ div#divs div {
     <!-- Divs appear here dynamicaly -->
 </div>
 
+<script src=pubnub.js></script>
 <script>
-const divs = document.getElementById("divs");
+/*
+    TODO - pretty colors!!!!
+    TODO cache - for querySelector
+*/
+const userId  = `userId-${Math.random()}.${Math.random()}`;
+const channel = 'one-million-divs';
+const pubnub  = PubNub({userId: userId});
+const divs    = document.getElementById("divs");
+
+function broadcast(index, color) {
+    pubnub.publish({
+        channel : channel,
+        message : {
+            index : index,
+            color : color,
+        },
+    });
+}
 
 function motion(event) {
     event.preventDefault();
     event.stopImmediatePropagation();
     const index = getIndex(event);
-    colorize(event.target);
-    console.log(index);
+    const color = '#fff';
+    broadcast(index, color);
+    colorize(index, color);
     return false;
 }
 
-function colorize(target) {
-    target.style.backgroundColor = "#fff";
+pubnub.subscribe({
+    channel: channel,
+    messages: (msg) =>
+        colorize(msg.index, msg.color),
+});
+
+function colorize(index, color) {
+    const target = document.querySelector(`div[i="${index}"]`);
+    target.style.backgroundColor = color;
 }
 
 function getIndex(event) {
