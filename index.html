@@ -142,7 +142,6 @@ function broadcast(index, color) {
 }
 
 
-
 let drawBool = false
 function ondown(event) {
 	drawBool = true
@@ -214,8 +213,15 @@ function clamp(num, min, max) {
 
 pubnub.subscribe({
     channel: channel,
-    messages: (msg) => 
-		colorize(msg.index, msg.color)
+    messages: (msgOrMsgs) => {
+		if(!Array.isArray(msgOrMsgs)) {
+			msgOrMsgs = [msgOrMsgs]
+		}
+		for(const msg of msgOrMsgs) {
+			colorize(msg.index, msg.color)
+		}
+	}
+		
 })
 
 function colorize(index, color) {
@@ -317,6 +323,27 @@ function randomColor() {
 	const g = Math.floor(100 + Math.random() * 156)
 	const b = Math.floor(100 + Math.random() * 156)
 	return rgb2hex([r,g,b])
+}
+
+
+// test functionality of an array of messages.
+function testArrayMessage() {
+	const msgs = []
+	for(var i = 0; i < 100; i++) {
+		const msg = {
+			index: i,
+			color: randomColor()
+		}
+		msgs.push(msg)
+	}
+	
+	console.log('yay')
+	console.log(msgs)
+	
+	pubnub.publish({
+        channel : channel,
+        message : msgs,
+    })
 }
 
 </script>
