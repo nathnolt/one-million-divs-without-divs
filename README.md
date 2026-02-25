@@ -8,18 +8,16 @@ We need to solve the slow part
 ## Benchmark innerHTML vs DOM node minaipulation appendChild()
 
 1. divs.innerHMTL += "more divs"
-2. divs.appendChild()
-
-
+2. divs.appendChild() - WINNER! 🎉🎉🎉🎉
 
 ## Challenges:
 
- - too many divs to render ( make browser slow )
+ - ✅ too many divs to render ( make browser slow )
  - storage and retreival ( chunk the data 5K chunks ) 
  - compression ( bitmap binary MATHEMATICS )
- - multi - user LIVE
 
 ## Features
 
- - color theme / colors
- - multi user - so we can all modify each div bg color
+ - ✅ color theme / colors
+ - ✅ multi - user LIVE
+ - ✅ multi user - so we can all modify each div bg color

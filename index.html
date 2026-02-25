@@ -3,7 +3,6 @@ body, html, div {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background: #181818;
 }
 div#divs {
     display: grid;
@@ -14,7 +13,7 @@ div#divs {
 }
 
 div#divs div {
-    background: #888;
+    background: #222;
 }
 </style>
 
@@ -24,14 +23,16 @@ div#divs div {
 
 <script src=pubnub.js></script>
 <script>
-/*
-    TODO - pretty colors!!!!
-    TODO cache - for querySelector
-*/
 const userId  = `userId-${Math.random()}.${Math.random()}`;
 const channel = 'one-million-divs';
 const pubnub  = PubNub({userId: userId});
 const divs    = document.getElementById("divs");
+const color   = `#${rngHex()}${rngHex()}${rngHex()}`;
+const qsCache = {};
+
+function rngHex() {
+    return (Math.ceil(Math.random()*128)+127).toString(16);
+}
 
 function broadcast(index, color) {
     pubnub.publish({
@@ -42,22 +43,27 @@ function broadcast(index, color) {
         },
     });
 }
-
-function motion(event) {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    const index = getIndex(event);
-    const color = '#fff';
-    broadcast(index, color);
-    colorize(index, color);
-    return false;
-}
-
 pubnub.subscribe({
     channel: channel,
     messages: (msg) =>
         colorize(msg.index, msg.color),
 });
+
+function motion(event) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const index = getIndex(event);
+    broadcast(index, color);
+    colorize(index, color);
+    return false;
+}
+
+function queryDiv(index) {
+    if (index in qsCache) return qsCache[index];
+    const target = document.querySelector(`div[i="${index}"]`);
+    qsCache[index] = target;
+    return target;
+}
 
 function colorize(index, color) {
     const target = document.querySelector(`div[i="${index}"]`);
