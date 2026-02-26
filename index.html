@@ -227,8 +227,12 @@ function onup() {
 
 
 // handle drawing itself
-let prevX = -1
-let prevY = -1
+
+// handle index deduplication, for less network load, 
+// helpful for dragging when bigger sizes
+let recents = []
+let recentsCount
+
 function draw(event) {
 	if(!drawBool) {
 		return
@@ -253,27 +257,30 @@ function draw(event) {
 	const base_xCell = Math.floor(widthPercentage * canvas_width)
 	const base_yCell = Math.floor(heightPercentage * canvas_height)
 	
-	if(
-		base_xCell == prevX && 
-		base_yCell == prevY
-	) {
-		return
-	}
-	
 	const drawSize = Number(sizeInput.value)
+	recentsCount = drawSize * drawSize * 2
 	
 	for(let yIndex = 0; yIndex < drawSize; yIndex++) {
 		for(let xIndex = 0; xIndex < drawSize; xIndex++) {
 			const x = base_xCell + xIndex
 			const y = base_yCell + yIndex
 			const index = canvas_height * y + x
-			broadcast(index, drawColor)
-			colorize(index, drawColor)
+			
+			if(!recents.includes(index)) {
+				recents.push(index)
+				broadcast(index, drawColor)
+				colorize(index, drawColor)
+				
+				while(recents.length > recentsCount) {
+					recents.shift()
+				}
+			}
+			
+			
+			
 		}
 	}
 	
-	prevX = base_xCell
-	prevY = base_xCell
     return false
 }
 
