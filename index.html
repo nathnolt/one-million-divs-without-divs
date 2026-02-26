@@ -51,7 +51,22 @@ input {
 	background: black;
 	color:white;
 	border: 2px solid white;
-	
+}
+#div-wrapper {
+	position: absolute;
+	width: 100px;
+	height: 100px;
+	border: 1px;
+	letter-spacing: 0;
+	line-height: 1;
+	transform-origin: 0 0;
+	image-rendering: pixelated;
+}
+
+#div-wrapper > div {
+	display: inline-block;
+	width: 1px;
+	height: 1px;
 }
 </style>
 
@@ -79,23 +94,62 @@ input {
 		</span>
 	</div>
 	<div class="rest">
-		<canvas id="c" width="100" height="100"></canvas>
+		<canvas id="c" width="100" height="100" class="hidden"></canvas>
+		<div id="div-wrapper" class="hidden"></div>
 	</div>
 </main>
-
-<!-- <div id=divs>
-</div> -->
 
 <script src=pubnub.js></script>
 <script>
 
 const canvas_width = 100
 const canvas_height = 100
-c.width = canvas_width
-c.height = canvas_height
 
 const randomR = Math.random()
 let theColor
+
+let ctx
+
+// Setup DOM rendering.
+let renderStyle = 'div'
+// let renderStyle = 'canvas'
+
+// setup canvas rendering
+if(renderStyle == 'canvas')
+{
+	const canvasEl = $('#c')
+	canvasEl.classList.remove('hidden')
+	ctx = canvasEl.getContext('2d')
+	c.width = canvas_width
+	c.height = canvas_height
+}
+
+
+
+let divs
+if(renderStyle == 'div')
+{
+	const divWrapperEl = $('#div-wrapper')
+	divWrapperEl.classList.remove('hidden')
+	divWrapperEl.style.width = canvas_width + 'px'
+	divWrapperEl.style.height = canvas_height + 'px'
+	createDivs()
+	divs = Array.from(divWrapperEl.children)
+	resizeDivWrapperToRestSize()
+}
+
+function resizeDivWrapperToRestSize() {
+	const restEl = $('.rest')
+	const bounds = restEl.getBoundingClientRect()
+	const scaleWidth = bounds.width / canvas_width
+	const scaleHeight = bounds.height / canvas_height
+	const divWrapperEl = $('#div-wrapper')
+	divWrapperEl.style.transform = `scale(${scaleWidth}, ${scaleHeight})`
+}
+addEventListener('resize', function() {
+	resizeDivWrapperToRestSize()
+})
+
 
 
 const colorInput = $('#color')
@@ -125,9 +179,6 @@ function setRandomColor() {
 }
 
 const sizeInput = $('#size')
-
-const ctx = c.getContext('2d')
-
 
 const userId  = `userId-${Math.random()}.${Math.random()}`
 const channel = 'one-million-divs';
@@ -225,6 +276,7 @@ pubnub.subscribe({
 		
 })
 
+
 function colorize(index, color) {
 	if(isNaN(index)) {
 		return
@@ -237,13 +289,20 @@ function colorize(index, color) {
 	const x = index % canvas_height
 	const y = Math.floor(index / canvas_height)
 	
-	ctx.fillStyle = color
-	ctx.fillRect(x, y, 1, 1)
+	if(renderStyle == 'canvas') {
+		ctx.fillStyle = color
+		ctx.fillRect(x, y, 1, 1)
+	} else {
+		divs[index].style.backgroundColor = color
+	}
+	
 }
 
-c.addEventListener('pointerdown', ondown)
-c.addEventListener('pointerup', onup)
-c.addEventListener('pointermove', draw)
+
+const restEl = $('.rest')
+restEl.addEventListener('pointerdown', ondown)
+restEl.addEventListener('pointerup', onup)
+restEl.addEventListener('pointermove', draw)
 
 function $(selector, rootNode=document) {
 	return rootNode.querySelector(selector)
@@ -318,7 +377,6 @@ function rgb2hex(rgbArr) {
 	return hex
 }
 
-
 function randomColor() {
 	const r = Math.floor(100 + Math.random() * 156)
 	const g = Math.floor(100 + Math.random() * 156)
@@ -326,6 +384,19 @@ function randomColor() {
 	return rgb2hex([r,g,b])
 }
 
+
+
+function createDivs() {
+	const docFrag = document.createDocumentFragment()
+	const total = canvas_height * canvas_width
+	for(var i = 0; i < total; i++) {
+		const divEl = document.createElement('div')
+		divEl.style.backgroundColor = '#000000'
+		docFrag.appendChild(divEl)
+	}
+	
+	$('#div-wrapper').appendChild(docFrag)
+}
 
 // test functionality of an array of messages.
 function testArrayMessage() {
