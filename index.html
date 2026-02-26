@@ -102,19 +102,23 @@ input {
 <script src=pubnub.js></script>
 <script>
 
+// define our size
 const canvas_width = 100
 const canvas_height = 100
 
-const randomR = Math.random()
+// define our paint color
 let theColor
 
-let ctx
 
-// Setup DOM rendering.
+
+// here you can set the renderStyle. Note that canvas is way more performant, 
+// especially if the width and height is a lot larger
 let renderStyle = 'div'
 // let renderStyle = 'canvas'
 
+
 // setup canvas rendering
+let ctx
 if(renderStyle == 'canvas')
 {
 	const canvasEl = $('#c')
@@ -125,7 +129,7 @@ if(renderStyle == 'canvas')
 }
 
 
-
+// Setup DOM rendering.
 let divs
 if(renderStyle == 'div')
 {
@@ -137,7 +141,6 @@ if(renderStyle == 'div')
 	divs = Array.from(divWrapperEl.children)
 	resizeDivWrapperToRestSize()
 }
-
 function resizeDivWrapperToRestSize() {
 	const restEl = $('.rest')
 	const bounds = restEl.getBoundingClientRect()
@@ -146,19 +149,27 @@ function resizeDivWrapperToRestSize() {
 	const divWrapperEl = $('#div-wrapper')
 	divWrapperEl.style.transform = `scale(${scaleWidth}, ${scaleHeight})`
 }
+
+// Handle resizing.
 addEventListener('resize', function() {
 	resizeDivWrapperToRestSize()
 })
 
 
-
+// handle random color
 const colorInput = $('#color')
 setRandomColor()
 $('#get-randomcolor').addEventListener('click', setRandomColor)
 colorInput.addEventListener('input', function() {
 	theColor = color.value
 })
+function setRandomColor() {
+	theColor = randomColor()
+	colorInput.value = theColor
+}
 
+
+// handle rainbow mode
 let rainbowMode = false
 let rainbowIndex = 0
 let rainbowCol = [255,0,0]
@@ -167,19 +178,16 @@ const rainbowInput = $('#rainbow')
 rainbowInput.addEventListener('input', function() {
 	rainbowMode = rainbowInput.checked
 })
-
 const rainbowSpeedInput = $('#rainbow-speed')
 rainbowSpeedInput.addEventListener('input', function() {
 	rainbowChangeSpeed = Number(rainbowSpeedInput.value)
 })
 
-function setRandomColor() {
-	theColor = randomColor()
-	colorInput.value = theColor
-}
-
+// handle size
 const sizeInput = $('#size')
 
+
+// handle pubnub
 const userId  = `userId-${Math.random()}.${Math.random()}`
 const channel = 'one-million-divs';
 const pubnub  = PubNub({userId: userId})
@@ -193,7 +201,21 @@ function broadcast(index, color) {
     })
 }
 
+pubnub.subscribe({
+    channel: channel,
+    messages: (msgOrMsgs) => {
+		if(!Array.isArray(msgOrMsgs)) {
+			msgOrMsgs = [msgOrMsgs]
+		}
+		for(const msg of msgOrMsgs) {
+			colorize(msg.index, msg.color)
+		}
+	}
+		
+})
 
+
+// handle drawing only when you press the mouse button
 let drawBool = false
 function ondown(event) {
 	drawBool = true
@@ -203,6 +225,8 @@ function onup() {
 	drawBool = false
 }
 
+
+// handle drawing itself
 let prevX = -1
 let prevY = -1
 function draw(event) {
@@ -253,30 +277,9 @@ function draw(event) {
     return false
 }
 
-function clamp(num, min, max) {
-	if(num < min) {
-		num = min
-	}
-	if(num > max) {
-		num = max
-	}
-	return num
-}
-
-pubnub.subscribe({
-    channel: channel,
-    messages: (msgOrMsgs) => {
-		if(!Array.isArray(msgOrMsgs)) {
-			msgOrMsgs = [msgOrMsgs]
-		}
-		for(const msg of msgOrMsgs) {
-			colorize(msg.index, msg.color)
-		}
-	}
-		
-})
 
 
+// handle actual drawing of 1 pixel
 function colorize(index, color) {
 	if(isNaN(index)) {
 		return
@@ -298,14 +301,31 @@ function colorize(index, color) {
 	
 }
 
-
+// add the pointer events.
 const restEl = $('.rest')
 restEl.addEventListener('pointerdown', ondown)
 restEl.addEventListener('pointerup', onup)
 restEl.addEventListener('pointermove', draw)
 
+
+// 
+// helper functions
+// 
+
+// element queryer
 function $(selector, rootNode=document) {
 	return rootNode.querySelector(selector)
+}
+
+// clamp function
+function clamp(num, min, max) {
+	if(num < min) {
+		num = min
+	}
+	if(num > max) {
+		num = max
+	}
+	return num
 }
 
 // change the rainbow color.
@@ -368,6 +388,7 @@ function changeRainbowColor() {
 	rainbowCol = [r,g,b]
 }
 
+// color helper
 function rgb2hex(rgbArr) {
 	let hex = "#"
 	for(let i = 0; i < 3; i++) {
@@ -377,6 +398,7 @@ function rgb2hex(rgbArr) {
 	return hex
 }
 
+// get a random color
 function randomColor() {
 	const r = Math.floor(100 + Math.random() * 156)
 	const g = Math.floor(100 + Math.random() * 156)
@@ -385,7 +407,7 @@ function randomColor() {
 }
 
 
-
+// create the div elements
 function createDivs() {
 	const docFrag = document.createDocumentFragment()
 	const total = canvas_height * canvas_width
@@ -398,7 +420,10 @@ function createDivs() {
 	$('#div-wrapper').appendChild(docFrag)
 }
 
-// test functionality of an array of messages.
+
+// 
+// Test functionality of an array of messages.
+// 
 function testArrayMessage() {
 	const msgs = []
 	for(var i = 0; i < 100; i++) {
